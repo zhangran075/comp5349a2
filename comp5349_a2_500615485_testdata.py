@@ -232,4 +232,4 @@ result_df = spark.createDataFrame(final_result,['source', 'question', 'answer_st
 result_df.printSchema()
 
 #transfer into Jason file
-result_df.write.json('F_result.json')
+result_df.write.json('F_result_test.json')
