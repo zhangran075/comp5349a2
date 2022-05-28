@@ -39,65 +39,50 @@ data_df= init_df.select((explode("data").alias('data')))
 
 data_df.printSchema()
 
-#fu
+from pyspark.sql.functions import explode
+data_df= init_df.select((explode("data").alias('data')))
+
+data_df.printSchema()
+
+#import lib 
 from pyspark.sql.functions import explode
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql import Window, Row
 
-"""1. paragraph"""
+"""take out the paragraph as new dataframe"""
 
-Test_data_df = data_df.select(explode("data.paragraphs").alias("paragraph"))
-Test_data_df.show(5)
+data_df = data_df.select(explode("data.paragraphs").alias("paragraph"))
+data_df.show(5)
 
-"""2.paragraph+qas"""
+"""take out the context and qas as new dataframe"""
 
-Test_data_df = Test_data_df.select(col("paragraph.context").alias("paragraph_context"),explode("paragraph.qas").alias('qas'))
-Test_data_df.show(5)
+data_df = data_df.select(col("paragraph.context").alias("paragraph_context"),explode("paragraph.qas").alias('qas'))
+data_df.show(5)
 
-"""3.paragraph+(qas->)qas_question,qas_is_impossible,answer"""
+"""flat the element in qas and combine with context"""
 
-Test_data_df =Test_data_df.select(col("paragraph_context"),
+data_df = data_df.select(col("paragraph_context"),
 col("qas.question").alias("qas_question"),
 col("qas.is_impossible").alias("qas_is_impossible"),explode_outer("qas.answers").alias('answers'),
 )
-Test_data_df.show(5)
+data_df.show(5)
 
-"""4.Paragraph+qas_question+qas_is_impossible+(answer)->answer_start,answer_text"""
+"""flat element in answers and combine before column"""
 
-Test_data_df = Test_data_df.select(col("paragraph_context"),
+data_df = data_df.select(col("paragraph_context"),
   col("answers.text").alias("answer_text"),
   col("answers.answer_start").alias("answer_start"),
   col("qas_is_impossible"),
   col("qas_question")
 )
-Test_data_df.show(5)
+data_df.show(5)
 
 #total number of test contracts are 102
 total_num = data_df.count()
-'''
-#select the paragraphs named paragraph as new test_paragraph_df
-paragraph_df = data_df.select((explode("data.paragraphs").alias("paragraph")))
-paragraph_df.printSchema()
-#select the qas&context part as new df
-qas_context_df = paragraph_df.select("paragraph.context",(explode("paragraph.qas").alias("qas")))
-qas_context_df.printSchema()
-'''
-
-'''
-#test
-qas_context_df = qas_context_df.select("context",(explode("qas.answers").alias("answers")),"qas.is_impossible","qas.question")
-qas_context_df.printSchema()
-qas_context_df = qas_context_df.select("context","answers.text","answers.answer_start","is_impossible","question")
-qas_context_df.printSchema()
-qas_context_df.show(3)
-'''
 
 # convert the df into rdd
-
-#qas_context_rdd = qas_context_df.rdd
-
-qas_context_rdd = Test_data_df.rdd
+qas_context_rdd = data_df.rdd
 qas_context_rdd.take(1)
 
 #convert format from row to list
