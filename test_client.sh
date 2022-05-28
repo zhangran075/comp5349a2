@@ -1,5 +1,5 @@
 spark-submit \
     --master yarn \
     --deploy-mode client \
-    test_.py \
+    test.py \
     --output $1
