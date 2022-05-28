@@ -47,14 +47,4 @@ paragraph_df.printSchema()
 qas_context_df = paragraph_df.select("paragraph.context",(explode("paragraph.qas").alias("qas")))
 qas_context_df.printSchema()
 
-#flat the info what we need : context,text,answer_start,is_impossible and question
-qas_context_df = qas_context_df.select("context","qas.answers.text","qas.answers.answer_start","qas.is_impossible","qas.question")
-qas_context_df.printSchema()
 
-# convert the df into rdd
-qas_context_rdd = qas_context_df.rdd
-qas_context_rdd.take(1)
-
-#convert format from row to list
-qas_context_rdd_li= qas_context_rdd.map(list)
-qas_context_rdd_li.take(5)
